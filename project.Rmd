@@ -15,7 +15,11 @@ library(data.table)
 ```
 
 ```{r}
-data(GLD)
+VIX<-read.table("VIX.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
+GLD<-read.table("GLD.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
+USO<-read.table("USO.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
+FL<-read.table("FL interest etf.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
+StandardPoor <-read.table("S&P.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
 ```
 
 # Guiding Question (i.e., Research Question): Make a clear statement of a single guiding/research question that will drive your analysis.  It should be phrased as a question that you will try to investigate (i.e., it should have a question mark) 
@@ -23,18 +27,35 @@ data(GLD)
 
 # Become acquainted with your data sources:
 ## Where did you find them?
+### Yahoo Finance
 ## Who collected/maintains them?
+### Yahoo Finance collects and maintains the data. 
 ## When & Why were they originally collected?
+### This data is collected continually by Yahoo Finance to analyze stock prices.
 ## What does a case represent in each data source, and how many total cases are available?
+### Each case represents a stock on a given day, and each data set has 504 cases, spanning 2 years of trading.
 ## What are some of the variables that you plan to use
+### We plan to use the closing price and date variables.
 
 #The R Notebook should include R code chunks & output as well as narrative (bullet list is fine at this stage) as you answer these questions
 ## Explore intuition related to the research question
+### The preliminary idea is that each asset class will trade in a specific way to the overall market (which we chose to be the S&P 500, further details regarding each asset/stock will be included in the final draft).  Lower interest rates stimulate the economy, gold prices are generally considered a safe-haven asset, and VIX measures volatility through S&P500 options, thus all three should be fairly inverse to the S&P 500. Finally, we are unsure about oil be we theorize that it will be positively correlated to the S&P as oil demand will likely follow the rest of the market.
 ## Create some informative plots and summary statistics 
-## Describe preliminary observations and intuition about the research question
+```{r}
+MasterData <-
+  StandardPoor %>%
+  select(Date, spClose = Close) %>%
+  left_join(FL %>% select(Date, flClose = Close), by = "Date")%>%
+  left_join(GLD %>% select(Date, gldClose = Close), by = "Date")%>%
+  left_join(USO %>% select(Date, usoClose = Close), by = "Date")%>%
+  left_join(VIX %>% select(Date,vixClose = Close), by = "Date")
+  
+```
+```{r}
+StandardPoor %>%
+  ggplot(aes(x=Date, y=Close))+geom_line(aes(y=Close)
+```
+
 
 # TWO Data Sources (at least)
-## Primary data:  This is the main data source to be used in your investigation and it MUST NOT be loaded directly from an R package (but API's are fine for example). You should have many cases (e.g., at least hundreds--preferably many thousands), many variables including a mixture of both categorical & quantitative variables.  
-## Other data sources: No problem for these to come from an R package--for example, the ZipGeography or ZipDemography data (from DataComputing package) might be useful when joined with primary sources as you investigate some phenomenon in the US. 
-## Note: Each data source should be less than 80-100MB--the maximum file size permitted in a GitHub Repo... use sampling to create a reduced version for the purpose of the project if needed as we've done occasionally in exercises and weekly activities.
-
+## Primary data:  There are 5 primary data sources from price data on 5 various indexes of assets.
