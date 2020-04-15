@@ -11,6 +11,7 @@ library(mosaicData)
 library(DataComputing)
 library(ggplot2)
 library(data.table)
+library(lubridate)
 
 ```
 
@@ -18,55 +19,43 @@ library(data.table)
 VIX<-read.table("VIX.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
 GLD<-read.table("GLD.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
 USO<-read.table("USO.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
-FL<-read.table("FL interest etf.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
 StandardPoor <-read.table("S&P.csv", header=TRUE,sep=",",stringsAsFactors = FALSE)
 ```
 
 
-# Guiding Question (i.e., Research Question): Make a clear statement of a single guiding/research question that will drive your analysis.  It should be phrased as a question that you will try to investigate (i.e., it should have a question mark) 
-## The guiding question for our group is how to different stock indexes and prices of various asset classes relate to each other in price, and are there correlations between them?
+## Guiding Question:
+### The guiding question for our group is how to different stock indexes and prices of various asset classes relate to each other in price, and are there correlations between them?
 
-# Become acquainted with your data sources:
-## Where did you find them?
-### Yahoo Finance
-## Who collected/maintains them?
-### Yahoo Finance collects and maintains the data. 
-## When & Why were they originally collected?
-### This data is collected continually by Yahoo Finance to analyze stock prices.
-## What does a case represent in each data source, and how many total cases are available?
-### Each case represents a stock on a given day, and each data set has 504 cases, spanning 2 years of trading.
-## What are some of the variables that you plan to use
-### We plan to use the closing price and date variables.
+## Data Sources:
+### Where did you find them?
+#### Yahoo Finance
+### Who collected/maintains them?
+#### Yahoo Finance collects and maintains the data. 
+### When & Why were they originally collected?
+#### This data is collected continually by Yahoo Finance to analyze stock prices.
+### What does a case represent in each data source, and how many total cases are available?
+#### Each case represents a stock on a given day, and each data set has 504 cases, spanning 2 years of trading.
+### What are some of the variables that you plan to use
+#### We plan to use the closing price and date variables.
+### Primary data:  There are 5 primary data sources from price data on 5 various indexes of assets.
 
-# The R Notebook should include R code chunks & output as well as narrative (bullet list is fine at this stage) as you answer these questions
-## Explore intuition related to the research question
+## Preliminary ideas:
+### First, we need to discuss each index and stock we are using.
+### Since we are observing the general market against other assets, the benchmark we will use is the S&P 500 index. It is a market-cap-weighted index of 500 of the largest companies within 11 respective industries, and it is an extremely well known and common indicator of the overall U.S market. It is what we are using to compare against the others.
+### We wanted to compare the market to what is commonly known as the “safe haven asset” of gold. So we are using the GLD SPDR Gold Trust ETF which is an ETF that tracks gold spot prices and shows its fluctuations.
+### Next, we wanted to look at how oil tracks against stocks to see if there was a correlation. We used USO which reflects daily changes in spot prices of crude oil from the U.S.
+### Finally, we wanted to compare the S&P 500 to the VIX, a very commonly used volatility indicator by the CBOE exchange. The VIX is a real-time volatility indicator reflecting inputs of S&P 500 index options, and that effectively makes it an index for implied volatility of the market.
+
 ### The preliminary idea is that each asset class will trade in a specific way to the overall market (which we chose to be the S&P 500, further details regarding each asset/stock will be included in the final draft).  Lower interest rates stimulate the economy, gold prices are generally considered a safe-haven asset, and VIX measures volatility through S&P500 options, thus all three should be fairly inverse to the S&P 500. Finally, we are unsure about oil be we theorize that it will be positively correlated to the S&P as oil demand will likely follow the rest of the market.
-## Create some informative plots and summary statistics 
-```{r}
-MasterData <-
-  StandardPoor %>%
-  select(Date, spClose = Close) %>%
-  left_join(FL %>% select(Date, flClose = Close), by = "Date")%>%
-  left_join(GLD %>% select(Date, gldClose = Close), by = "Date")%>%
-  left_join(USO %>% select(Date, usoClose = Close), by = "Date")%>%
-  left_join(VIX %>% select(Date,vixClose = Close), by = "Date") %>%
-  mutate(Date=lubridate::ymd(Date)) %>%
-  gather(key=asset, value= price, spClose, flClose, gldClose, usoClose, vixClose)
-  
-  
-```
+## Preliminary plots and summary statistics: 
+
 ```{r}
 StandardPoor %>%
   mutate(Date=lubridate::ymd(Date)) %>%
   ggplot(aes(x=Date,y=Close))+
   geom_line()
 ```
-```{r}
-FL %>%
-  mutate(Date=lubridate::ymd(Date)) %>%
-  ggplot(aes(x=Date,y=Close))+
-  geom_line()
-```
+
 ```{r}
 GLD %>%
   mutate(Date=lubridate::ymd(Date)) %>%
@@ -86,7 +75,65 @@ VIX %>%
   geom_line()
 ```
 
-## From the data above it is very clear that VIX and S&P are the two most inversly correlated, but there is alot of interesting trends. For example, we see that interest rates were fairly inverse to the S&P until the coronavirus situation with led to both declining. We will discuss this for the full project. Additionally on the full project, we will utilize MasterData and mutate adjusted returns indexed to 0. This will be able to show all the charts on one or one faceted grid with everything in the same range. Returns will also generate a much better idea of correlations rather than just looking at prices.
+### From the data above it is very clear that VIX and S&P are the two most inversly correlated, but there is alot of interesting trends. For example, we see that interest rates were fairly inverse to the S&P until the coronavirus situation with led to both declining. We will discuss this further below, and based on the charts above it is obviously hard to tell price changes based on 4 separate charts.If we simply combined them, it would not work as the S&P is well over $2,000 while overs are below $20. The large axis range would distort the smaller priced indexes, so we much adjust each stock so we can somehow see its changes effectively on a reasonable axis. What we did was index each stock to 0 at is a start date and chart the rest based on the percentage change, and this way we eliminate price difference as a problem completely. The equation to do this is (New Price - Initial Price)/Initial Price. You can see this in the MasterData changes below.
 
-# TWO Data Sources (at least)
-## Primary data:  There are 5 primary data sources from price data on 5 various indexes of assets.
+```{r}
+GLD<-
+  GLD %>%
+  mutate(Change = (Close-125.80)/125.80*10)
+USO<-
+  USO %>%
+  mutate(Change = (Close-12.83)/12.83*10)
+VIX<-
+  VIX %>%
+  mutate(Change = (Close-18.94)/18.94*10)
+StandardPoor<-
+  StandardPoor %>%
+  mutate(Change = (Close-2662.84)/2662.84*10)
+  
+MasterData <-
+  StandardPoor %>%
+  select(Date, sp = Change) %>%
+  left_join(GLD %>% select(Date, gld = Change), by = "Date")%>%
+  left_join(USO %>% select(Date, uso = Change), by = "Date")%>%
+  left_join(VIX %>% select(Date, vix = Change), by = "Date") %>%
+  mutate(Date=lubridate::ymd(Date)) %>%
+  gather(key=asset, value= PercentChange, sp, gld, uso, vix)
+```
+
+```{r}
+MasterData %>%
+  ggplot(aes(x=Date,color=asset, y=PercentChange))+
+  geom_line()
+```
+
+### Above is the assets all toghether indexed by 0. Initially we can see many more obvious connections but we can look on a case by case basis.
+
+```{r}
+
+MasterData %>%
+  filter(asset == "sp" | asset == "vix") %>%
+  ggplot(aes(x=Date,color=asset, y=PercentChange))+
+  geom_line()
+```
+### From above you can tell that generally when the S&P dips, the VIX clearly spikes. They are meant to be fairly inversly correlated. It is much more pronounced in the VIX as it is in the nature of the index. It is very obvious for the recent coronavirus situation as the S&P completely dropped while the VIX surged ~30%
+
+```{r}
+
+MasterData %>%
+  filter(asset == "sp" | asset == "uso") %>%
+  ggplot(aes(x=Date,color=asset, y=PercentChange))+
+  geom_line()
+```
+### Oil prices and the overall market are fairly positively correlated. This makes sense as a growing economy means that there is more oil demand which would apply upward pressure to prices. This correlation is very clear for the coronavirus last month as the S&P fell while oil fell due to falling China demand. There are some deviations due to supply changes from countries like Russia and OPEC.
+```{r}
+
+MasterData %>%
+  filter(asset == "sp" | asset == "gld") %>%
+  ggplot(aes(x=Date,color=asset, y=PercentChange))+
+  geom_line()
+```
+### Gold and the S&P are generally inversly correlated in the Short term. Both historically have gone up, but it is clear that when the S&P surges, gold falls and vice versa. In the last month, The market uncertainty has not made gold prices soar which surprised us, but it still has significantly outperformed the S&P and kept its value, showing the safe haven nature of the asset.
+
+
+
