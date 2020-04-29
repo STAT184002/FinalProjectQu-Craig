@@ -127,6 +127,10 @@ MasterData %>%
 ```
 ### Oil prices and the overall market are fairly positively correlated. This makes sense as a growing economy means that there is more oil demand which would apply upward pressure to prices. This correlation is very clear for the coronavirus last month as the S&P fell while oil fell due to falling China demand. There are some deviations due to supply changes from countries like Russia and OPEC.
 ```{r}
+MasterData %>%
+  filter(asset == "sp" | asset == "gld") %>%
+  ggplot(aes(x=Date,color=asset, y=PercentChange))+
+  geom_jitter()
 
 MasterData %>%
   filter(asset == "sp" | asset == "gld") %>%
@@ -134,6 +138,4 @@ MasterData %>%
   geom_line()
 ```
 ### Gold and the S&P are generally inversly correlated in the Short term. Both historically have gone up, but it is clear that when the S&P surges, gold falls and vice versa. In the last month, The market uncertainty has not made gold prices soar which surprised us, but it still has significantly outperformed the S&P and kept its value, showing the safe haven nature of the asset.
-
-
 
