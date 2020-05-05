@@ -46,7 +46,7 @@ StandardPoor <-read.table("S&P.csv", header=TRUE,sep=",",stringsAsFactors = FALS
 ### Next, we wanted to look at how oil tracks against stocks to see if there was a correlation. We used USO which reflects daily changes in spot prices of crude oil from the U.S.
 ### Finally, we wanted to compare the S&P 500 to the VIX, a very commonly used volatility indicator by the CBOE exchange. The VIX is a real-time volatility indicator reflecting inputs of S&P 500 index options, and that effectively makes it an index for implied volatility of the market.
 
-### The preliminary idea is that each asset class will trade in a specific way to the overall market (which we chose to be the S&P 500, further details regarding each asset/stock will be included in the final draft).  Lower interest rates stimulate the economy, gold prices are generally considered a safe-haven asset, and VIX measures volatility through S&P500 options, thus all three should be fairly inverse to the S&P 500. Finally, we are unsure about oil be we theorize that it will be positively correlated to the S&P as oil demand will likely follow the rest of the market.
+### The preliminary idea is that each asset class will trade in a specific way to the overall market.  Lower interest rates stimulate the economy, gold prices are generally considered a safe-haven asset, and VIX measures volatility through S&P500 options, thus all three should be fairly inverse to the S&P 500. Finally, we are unsure about oil be we theorize that it will be positively correlated to the S&P as oil demand will likely follow the rest of the market.
 ## Preliminary plots and summary statistics: 
 
 ```{r}
@@ -54,7 +54,14 @@ StandardPoor %>%
   mutate(Date=lubridate::ymd(Date)) %>%
   ggplot(aes(x=Date,y=Close))+
   geom_line()
+
+StandardPoor %>%
+  mutate(Date=lubridate::ymd(Date)) %>%
+  ggplot(aes(x=Date,y=Close))+
+  geom_point()
 ```
+### Above,we used points and a line, and you can probably see why stocks are always shown with a line. Even thorugh we used daily numbers, it still looks very jumbled so imagine if that was updated to every second! That is why for the rest of the project we only used lines.
+
 
 ```{r}
 GLD %>%
@@ -75,7 +82,7 @@ VIX %>%
   geom_line()
 ```
 
-### From the data above it is very clear that VIX and S&P are the two most inversly correlated, but there is alot of interesting trends. For example, we see that interest rates were fairly inverse to the S&P until the coronavirus situation with led to both declining. We will discuss this further below, and based on the charts above it is obviously hard to tell price changes based on 4 separate charts.If we simply combined them, it would not work as the S&P is well over $2,000 while overs are below $20. The large axis range would distort the smaller priced indexes, so we much adjust each stock so we can somehow see its changes effectively on a reasonable axis. What we did was index each stock to 0 at is a start date and chart the rest based on the percentage change, and this way we eliminate price difference as a problem completely. The equation to do this is (New Price - Initial Price)/Initial Price. You can see this in the MasterData changes below.
+### From the data above it is very clear that VIX and S&P are the two most inversely correlated, but there is a lot of interesting trends. For example, we see that interest rates were fairly inverse to the S&P until the coronavirus situation which led to both declining. Based on the charts above it is obviously hard to tell price changes based on 4 separate charts.If we simply combined them, it would not work as the S&P is well over $2,000 while others are below $20. The large axis range would distort the smaller priced indexes, so we much adjust each stock so we can somehow see its changes effectively on a reasonable axis. What we did was index each stock to 0 for its start date and chart the rest based on the percentage change, and this way we eliminate price difference as a problem completely. The equation to do this is (New Price - Initial Price)/Initial Price. You can see this in the MasterData changes below.
 
 ```{r}
 GLD<-
@@ -107,7 +114,7 @@ MasterData %>%
   geom_line()
 ```
 
-### Above is the assets all toghether indexed by 0. Initially we can see many more obvious connections but we can look on a case by case basis.
+### Above is the assets all together indexed by 0. Initially, we can see some connections and correlations, but we can better analyze the graphs on a case-by-case basis.
 
 ```{r}
 
@@ -116,7 +123,7 @@ MasterData %>%
   ggplot(aes(x=Date,color=asset, y=PercentChange))+
   geom_line()
 ```
-### From above you can tell that generally when the S&P dips, the VIX clearly spikes. They are meant to be fairly inversly correlated. It is much more pronounced in the VIX as it is in the nature of the index. It is very obvious for the recent coronavirus situation as the S&P completely dropped while the VIX surged ~30%
+### From above you can tell that generally when the S&P dips, the VIX clearly spikes. They are meant to be fairly inversely correlated. This is because Vix is calculated by using S&P 500 options volatility, so it should reflect that inverse relationship.It is much more pronounced in the VIX as it is in the nature of the index. It is very obvious for the recent coronavirus situation as the S&P completely dropped while the VIX surged ~30%.
 
 ```{r}
 
@@ -130,12 +137,7 @@ MasterData %>%
 MasterData %>%
   filter(asset == "sp" | asset == "gld") %>%
   ggplot(aes(x=Date,color=asset, y=PercentChange))+
-  geom_jitter()
-
-MasterData %>%
-  filter(asset == "sp" | asset == "gld") %>%
-  ggplot(aes(x=Date,color=asset, y=PercentChange))+
   geom_line()
 ```
-### Gold and the S&P are generally inversly correlated in the Short term. Both historically have gone up, but it is clear that when the S&P surges, gold falls and vice versa. In the last month, The market uncertainty has not made gold prices soar which surprised us, but it still has significantly outperformed the S&P and kept its value, showing the safe haven nature of the asset.
+### Gold and the S&P are generally inversely correlated in the Short term. Both historically have gone up, but it is clear that when the S&P surges, gold falls and vice versa. In the last month, the market uncertainty has not made gold prices soar which surprised us, but it still has significantly outperformed the S&P and kept its value, showing the safe haven nature of the asset. Gold is a safe haven asset beacuse it has intrinsic value. It means that when markets fall, people invest in gold due to the fact that it is a safer option due to that intrinsic value.
 
